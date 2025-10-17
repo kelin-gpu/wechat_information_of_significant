@@ -45,3 +45,81 @@
 ### 数据流转结构
 
 #### 第一条流程（未最终使用）：
+这个流程虽然最终未采用，但获取的数据更加丰富，也更难清洗。
+
+#### 第二条流程（最终使用）：
+
+在你重复这个流程时，只保留 `AMA_merged.json` 即可，后续脚本会重新生成其他文件。
+
+---
+
+### 📜 主要代码文件
+
+#### `code_json_tranform_csv.ipynb`
+- 从 `AMA_merged.json` 读取数据；
+- 使用 `pandas` 筛选出主要字段（`wxid`, `Timestamp`, `Text`）；
+- 输出为 `CSV` 文件，准备后续使用。
+
+#### `code_group10.ipynb`
+- 将多条聊天消息打包为一组（每 10 条为一组）；
+- 为每组计算时间范围、参与者集合；
+- 将文本用 `\n` 拼接；
+- 输出新的 `CSV` 文件，用于后续模型输入。
+
+---
+
+## 📂 api_work
+
+此模块用于调用 **阿里云 API** 来评估聊天内容的重要性。
+
+### 数据输入
+直接使用上一步生成的 `ama_group_message.csv`。
+
+### 主要流程
+1. 读取 CSV；
+2. 调用阿里云 API；
+3. 使用自定义 prompt（结合 DeepSeek、微信公众号 Nova 推广文案与个人理解）；
+4. 输出分析结果至 `ana_all.csv`。
+
+> ⚠️ 注意：
+> - API Key 不提供，请自行购买。
+> - 脚本会将字符串结果转为浮点数后存入 DataFrame。
+
+---
+
+## 📂 sklearn_part
+
+该模块是模型训练与应用部分。
+
+### `Normalization.ipynb`
+- 由于 API 输出的结果 (`acc`) 并非严格处于 `[0, 1]` 区间；
+- 需重新归一化，使结果映射到 0–1 范围。
+
+### `linear_regression.ipynb`
+- 使用归一化后的 `ama_all_norm.csv`；
+- 处理非数值列（使用 `OneHotEncoder`）；
+- 使用带正则化的线性回归模型；
+- 输出模型评估结果与图表；
+- 保存训练好的模型与编码器。
+
+### `use_model.ipynb`
+- 演示如何使用训练好的模型；
+- 只需输入三个特征：`wxid`, `time`, `text`；
+- 模型与编码器文件需放在同一目录；
+- 若需增加输入特征，请联系作者。
+
+---
+
+## 🧩 环境依赖
+
+- Python 3.8+
+- pandas  
+- numpy  
+- scikit-learn  
+- requests  
+- jupyter  
+
+安装依赖：
+```bash
+pip install -r requirements.txt
+****
